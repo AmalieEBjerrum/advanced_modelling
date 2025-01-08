@@ -1,0 +1,56 @@
+from scipy.linalg import expm
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define parameters
+b = 0.5
+c = 1.0
+T = 1.0  # Desired time gap
+v0 = 10.0  # Constant velocity of the front car
+
+# Define the system matrix A
+A = np.array([
+    [0, 1, 0, 0],
+    [-c, -b, 0, 0],
+    [0, 1, 0, -1],
+    [0, b, c, -b - T * c]
+])
+
+# Define the input vector B (multiplied by v0)
+B = np.array([1, b, 0, 0])
+
+# Initial conditions
+initial_conditions = np.array([0, 0, -T * v0, 0])  # [d1(0), v1(0), d2(0), v2(0)]
+
+# Time span for simulation
+t_span = np.linspace(0, 100, 500)  # From t=0 to t=100, with 500 points
+
+# Compute the solution using the matrix exponential
+solutions = np.array([
+    expm(t * A).dot(initial_conditions) + (expm(t * A) - np.eye(4)).dot(B * v0)
+    for t in t_span
+])
+
+# Extract results
+d1, v1, d2, v2 = solutions.T  # Separate the components for plotting
+
+# Plot results
+plt.figure(figsize=(10, 6))
+plt.plot(t_span, d1, label="$d_1$ (Relative Distance 1)")
+plt.plot(t_span, d2, label="$d_2$ (Relative Distance 2)")
+plt.xlabel("Time")
+plt.ylabel("Distances")
+plt.title("Relative Distances Over Time")
+plt.legend()
+plt.grid()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.plot(t_span, v1, label="$v_1$ (Velocity 1)")
+plt.plot(t_span, v2, label="$v_2$ (Velocity 2)")
+plt.xlabel("Time")
+plt.ylabel("Velocities")
+plt.title("Velocities Over Time")
+plt.legend()
+plt.grid()
+plt.show()
