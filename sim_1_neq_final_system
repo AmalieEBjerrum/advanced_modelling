@@ -1,0 +1,103 @@
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
+
+# Define the system of differential equations
+def car_system(t, z, n, b, c, T, v0):
+    """
+    Parameters:
+    - t: time
+    - z: state vector [x1, y1, ..., xn, yn]
+    - n: number of cars
+    - b, c: parameters of the system
+    - T: desired time gap
+    - v0: velocity of the front car (constant)
+    """
+    # Extract state variables
+    x = z[:n]  # Positions
+    y = z[n:]  # Velocities (x_dot)
+
+    # Initialize derivatives
+    dx = np.zeros(n)
+    dy = np.zeros(n)
+
+    # Front car dynamics
+    dx[0] = y[0]
+    dy[0] = -c * x[0] - b * y[0]
+
+    #A matrix
+    a_1 = 0
+    a_2 = -1
+    a_3 = c
+    a_4=-b-T*c
+
+    #B matrix
+    b_1 = 0
+    b_2 = 1
+    b_3 = 0
+    b_4 = b
+
+    # Dynamics for other cars
+    for k in range(1, n):
+        A1 = (b - T**2 * b**2 * c) / (1 - T * b) + c
+        A2 = (b - T * b**2) / (1 - T * b)
+        A3 = (T**2 * b**2 * c - T * b * c) / (1 - T * b) + T * b * c - c
+        A4 = (T * b**2 - b) / (1 - T * b) - T * c
+
+        dx[k] = y[k]
+        dy[k] = A1 * x[k - 1] + A2 * y[k - 1] + A3 * x[k] + A4 * y[k]
+
+    # Combine derivatives
+    return np.concatenate([dx, dy])
+
+# Parameters
+n = 4  # Number of cars
+b = 0.5
+c = 1.0
+T = 1  # Desired time gap
+v0 = 10.0  # Velocity of the front car (constant)
+
+# Initial conditions
+initial_positions = np.linspace(0, -T * v0 * (n - 1), n)  # Initial positions
+initial_velocities = np.zeros(n)  # Initial velocities
+initial_conditions = np.concatenate([initial_positions, initial_velocities])
+
+# Time span for simulation
+t_span = (0, 100)  # From t=0 to t=20
+t_eval = np.linspace(t_span[0], t_span[1], 500)  # Evaluation points
+
+# Solve the system
+solution = solve_ivp(
+    car_system,
+    t_span,
+    initial_conditions,
+    args=(n, b, c, T, v0),
+    t_eval=t_eval,
+    method='RK45'  # Runge-Kutta method
+)
+
+# Extract results
+t = solution.t
+positions = solution.y[:n]
+velocities = solution.y[n:]
+
+# Plot results
+plt.figure(figsize=(10, 6))
+for i in range(n):
+    plt.plot(t, positions[i], label=f"Car {i+1} Position (x{i+1})")
+plt.xlabel("Time")
+plt.ylabel("Positions")
+plt.title("Car Positions Over Time")
+plt.legend()
+plt.grid()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+for i in range(n):
+    plt.plot(t, velocities[i], label=f"Car {i+1} Velocity (v{i+1})")
+plt.xlabel("Time")
+plt.ylabel("Velocities")
+plt.title("Car Velocities Over Time")
+plt.legend()
+plt.grid()
+plt.show()
