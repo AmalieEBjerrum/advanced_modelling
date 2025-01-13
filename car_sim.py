@@ -71,8 +71,8 @@ def solve_with_matrix_exponential(system_matrix, update_statevector ,input_vecto
 
     # Solve the system for each time step
     for t in t_eval:
-        exp_system_matrix_t = expm(t * system_matrix)  # Compute e^(tA)
-        z_t = exp_system_matrix_t @ update_statevector + (exp_system_matrix_t - np.eye(system_matrix.shape[0])) @ system_matrix_inv_B 
+        exp_system_matrix_t = expm(t * system_matrix)  # Compute e^(tC)
+        z_t = exp_system_matrix_t @ (np.linalg.inv(system_matrix)@ input_vector+update_statevector)-np.linalg.inv(system_matrix)@input_vector  # Compute e^(tC) A^-1 B
         solution.append(z_t)
 
     return np.array(solution)
