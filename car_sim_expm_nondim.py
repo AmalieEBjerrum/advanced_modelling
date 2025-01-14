@@ -17,6 +17,8 @@ np.random.seed(42)
 
 # Initial conditions
 initial_distance = np.random.randint(0, 11, n)  # Initial distances
+sum_initial_distances= np.sum(initial_distance)
+initial_distance= initial_distance/sum_initial_distances
 initial_velocities = np.zeros(n)  # Initial velocities
 initial_conditions = np.concatenate([initial_distance, initial_velocities])
 

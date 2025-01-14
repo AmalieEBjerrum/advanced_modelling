@@ -3,7 +3,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
 
-omega=2*np.pi/3
+
 #Definition of the velocity function
 def v0_function(t,omega):
     return  np.exp(1j*omega*t)#2*np.sin(omega * t)+3  # Example: exp(i * omega * t)
@@ -70,8 +70,7 @@ def solve_with_matrix_exponential(t_eval, alpha, beta, N, omega):
     """
     # Precompute constants
     gamma1 = -(1j * omega + beta) / (omega**2 - 1j * omega - 1j * omega * beta - alpha)
-    gamma2 = np.sqrt(alpha**2 + omega**2) / np.sqrt((omega**2 - alpha)**2 + omega**2 * (1 + beta)**2)
-
+    gamma2 = -(1j * omega + alpha) / (omega**2 - 1j * omega - 1j * omega * beta - alpha)
     # Initialize solution arrays
     num_times = len(t_eval)
     v_matrix = np.zeros((num_times, N), dtype=complex)  # Complex numbers for velocities
@@ -80,8 +79,8 @@ def solve_with_matrix_exponential(t_eval, alpha, beta, N, omega):
     # Solve the system for each time step and car
     for l, t in enumerate(t_eval):
         for k in range(N):
-            d_t = gamma1**k * v0_function(t, omega)
-            v_t = gamma2**k * v0_function(t, omega)
+            d_t = gamma1**(k+1) * v0_function(t, omega)
+            v_t = gamma2**(k+1) * v0_function(t, omega)
             v_matrix[l, k] = v_t
             d_matrix[l, k] = d_t
 
