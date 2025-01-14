@@ -53,7 +53,7 @@ def car_system(t,state_vector, n, alpha, beta,omega):
     # Combine derivatives
     return derivatives, system_matrix, input_vector, update_statevector
 
-def solve_with_matrix_exponential(t_eval, alpha, beta, N, omega):
+def solve_with_matrix_exponential(t_eval, alpha, beta, N, omega,system_matrix, input_vector, update_statevector,K):
     """
     Solves the system using the matrix exponential.
 
@@ -83,5 +83,24 @@ def solve_with_matrix_exponential(t_eval, alpha, beta, N, omega):
             v_t = gamma2**(k+1) * v0_function(t, omega)
             v_matrix[l, k] = v_t
             d_matrix[l, k] = d_t
+    
+    sol_dist=[]
+    sol_vel=[]
+    # Initialize x_matrix and y_matrix with the correct shape
+    x_matrix = np.zeros((len(t_eval), N))  # For positions
+    y_matrix = np.zeros((len(t_eval), N))  # For velocities
 
-    return d_matrix, v_matrix
+    # Iterate over time and cars
+    for l, t in enumerate(t_eval):
+        exp_system_matrix_t = expm(t * system_matrix)  # Compute e^(tC)
+        z_t = exp_system_matrix_t @ (np.linalg.inv(system_matrix) @ input_vector * K + update_statevector) \
+            - np.linalg.inv(system_matrix) @ input_vector * K  # Compute the state vector at time t
+        
+        # Assign position and velocity for each car
+        for k in range(N):
+            x_matrix[l, k] = z_t[2 * k]      # Position of car k
+            y_matrix[l, k] = z_t[2 * k + 1]  # Velocity of car k
+
+    sol_dist=d_matrix+x_matrix
+    sol_vel=v_matrix+y_matrix
+    return sol_dist, sol_vel

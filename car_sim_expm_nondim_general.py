@@ -2,15 +2,16 @@ from scipy.linalg import expm
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-from car_sim_nondim import car_system
-from car_sim_nondim import solve_with_matrix_exponential
+from car_sim_nondim_general import car_system
+from car_sim_nondim_general import solve_with_matrix_exponential
 
 # Parameters
 n = 3  # Number of cars
-alpha=1
-beta= 1
+alpha=15
+beta= 10
 omega=3 # Frequency of the velocity function
-
+K=0 #constant velocity
+# V0= K+ exp(i omega t)
 
 #random seeed
 np.random.seed(42)
@@ -28,13 +29,13 @@ t_eval = np.linspace(t_span[0], t_span[1], 500)  # Evaluation points
 
 derivatives, system_matrix, input_vector, update_statevector = car_system(0,initial_conditions, n, alpha,beta, omega)
 #solve with matrix exponential
-d_matrix, v_matrix = solve_with_matrix_exponential(t_eval, alpha, beta, n, omega)
+d_matrix, v_matrix = solve_with_matrix_exponential(t_eval, alpha, beta, n, omega,system_matrix, input_vector, update_statevector,K)
 #solution_transposed = np.transpose(solution)
 
 # Assume t_eval, d_matrix, v_matrix, omega, and v0_function are already defined
 
 # Calculate the initial velocity for plotting
-initial_velocity = np.real(np.exp(t_eval* omega*1j))  # Take only the real part
+initial_velocity = np.real(np.exp(t_eval* omega*1j))+K  # Take only the real part
 
 # Create subplots
 fig, axs = plt.subplots(2, 1, figsize=(10, 10), sharex=True)

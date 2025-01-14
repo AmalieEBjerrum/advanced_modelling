@@ -12,7 +12,7 @@ c = 1.0
 T = 1  # Desired time gap
 v0 = 10.0  # Velocity of the front car (constant)
 
-#random seeed
+#random seed
 np.random.seed(42)
 
 # Initial conditions

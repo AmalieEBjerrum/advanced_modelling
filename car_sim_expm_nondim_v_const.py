@@ -7,9 +7,9 @@ from car_sim_nondim_v_const import solve_with_matrix_exponential
 
 # Parameters
 n = 3  # Number of cars
-alpha=5
-beta= 2
-v0=1
+alpha=1
+beta= 1
+v0=0.2
 
 #random seed
 np.random.seed(42)
