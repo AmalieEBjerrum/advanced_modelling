@@ -1,0 +1,63 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Dimensionless piecewise function for acceleration
+def compute_acceleration(alpha, beta, x, y, k, a_max):
+    """
+    Compute dimensionless acceleration with piecewise behavior.
+    
+    Args:
+        alpha (float): Non-dimensional distance sensitivity parameter (c * b^{-2}).
+        beta (float): Non-dimensional velocity sensitivity parameter (c * T * b^{-1}).
+        x (float): Distance error (dimensionless).
+        y (float): Velocity error (dimensionless).
+        k (float): Threshold for switching to saturation (dimensionless).
+        a_max (float): Maximum acceleration (dimensionless).
+    
+    Returns:
+        float: Acceleration (dimensionless).
+    """
+    a = alpha * x - beta * y
+    if np.abs(a) > k:
+        a = np.sign(a) * a_max
+    return a
+
+# Parameters
+alpha = 0.5   # Non-dimensional distance sensitivity
+beta = 0.3    # Non-dimensional velocity sensitivity
+k = 1.0       # Threshold for switching behavior
+a_max = 0.8   # Maximum acceleration (dimensionless)
+
+# Simulation
+time = np.linspace(0, 10, 1000)  # Time array
+x_initial = 1.0   # Initial distance error
+y_initial = 0.0   # Initial velocity error
+
+x = np.zeros_like(time)
+y = np.zeros_like(time)
+a = np.zeros_like(time)
+
+x[0] = x_initial
+y[0] = y_initial
+
+dt = time[1] - time[0]  # Time step
+
+# Simulate using Euler's method
+for i in range(1, len(time)):
+    a[i] = compute_acceleration(alpha, beta, x[i-1], y[i-1], k, a_max)
+    y[i] = y[i-1] + a[i] * dt  # Update velocity error
+    x[i] = x[i-1] + y[i] * dt  # Update distance error
+
+# Plot results
+plt.figure(figsize=(12, 6))
+plt.plot(time, x, label="Distance Error (x)")
+plt.plot(time, y, label="Velocity Error (y)")
+plt.plot(time, a, label="Acceleration (a)", linestyle='dashed')
+plt.axhline(k, color='red', linestyle='--', label='Threshold (k)')
+plt.axhline(-k, color='red', linestyle='--')
+plt.xlabel("Time (dimensionless)")
+plt.ylabel("Dimensionless Variables")
+plt.title("Simulation of Piecewise Acceleration Function")
+plt.legend()
+plt.grid()
+plt.show()
